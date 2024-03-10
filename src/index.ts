@@ -6,6 +6,8 @@ import {AppState, CatalogChangeEvent, ItemData, BasketData} from "./components/A
 import {CatalogPage} from "./components/CatalogPage";
 import {cloneTemplate, ensureElement} from "./utils/utils";
 import {CatalogItem, AuctionItem, BidItem} from "./components/Card";
+import {FirstOrderPage} from "./components/firstOrderPage";
+
 import {Modal} from "./components/Modal";
 // import {Basket, BasketList} from "./components/Basket"
 import {Basket} from "./components/Basket"
@@ -29,6 +31,9 @@ const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
 const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
 const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
 const basketListTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
+ const firstOrderScreenTemplate = ensureElement<HTMLTemplateElement>('#order');
+
+
 
 const basket = new Basket(cloneTemplate(basketTemplate), {
   onClick: () => events.emit('orderButton:click')
@@ -81,15 +86,15 @@ events.on('preview:changed', (item: ItemData) => {
 
       // 5^. Далее срабатывает другой подписчик на событие preview:changed:
       // 6^. Этот подписчик рендерит модальное окно (modal.render()), передавая в него содержимое, сгенерированное компонентом AuctionItem (card.render()).
-      modal.render({
-          content: previewCard.render({
-              title: item.title,
-              image: item.image,
-              description: item.description,             
-              price: item.price,
-              category: item.category,
-          })
-      });
+    modal.render({
+      content: previewCard.render({
+        title: item.title,
+        image: item.image,
+        description: item.description,             
+        price: item.price,
+        category: item.category,
+      })
+    });
   };
 
   if (item) {
@@ -115,10 +120,7 @@ events.on('busketButton:click', (item: ItemData) => {
   } else {
     console.log('уже в корзине')
     // previewCard.basketButton.setAttribute("disabled", "disabled");
-  }
-
-
-  
+  } 
   console.log(`клик "в корзину" ${item.id}`);
   basket.orderButton.removeAttribute("disabled");
   modal.close();
@@ -132,7 +134,7 @@ events.on('basket:changed', (item: ItemData) => {
     const cardForBasket = new BidItem(cloneTemplate(basketListTemplate), {
       onClick: () => events.emit('basketDeleteButton:click', item)
   });
-    console.log(basket.ul)
+    // console.log(basket.ul)
     return cardForBasket.render({
         title: item.title,
         price: item.price,
@@ -158,9 +160,22 @@ events.on('basketDeleteButton:click', (item: ItemData) => {
   }
 })
 
+
+
+// клик "Оформить"
+events.on('orderButton:click', (item: ItemData) => {  
+  console.log(`клик "Оформить" `);
+
+  const firstOrderScreen = new FirstOrderPage(cloneTemplate(firstOrderScreenTemplate), {
+    onClick: () => events.emit('firstOrderScreenButton:click', item)
+  })
+
+  modal.render({
+      content: firstOrderScreen.render({
+      })
+    });
  
-
-
+})
 
 
 

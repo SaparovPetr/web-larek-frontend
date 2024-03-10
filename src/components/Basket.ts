@@ -24,9 +24,9 @@ export class Basket extends Component<IBasket> {
     this.orderButton = ensureElement<HTMLButtonElement>('.basket__button', container);
     this._basketCounter = ensureElement<HTMLElement>('.basket__price', container);
     
-    // if (actions?.onClick) {      
-    //   this._orderButton.addEventListener('click', actions.onClick);
-    // }
+    if (actions?.onClick) {      
+      this.orderButton.addEventListener('click', actions.onClick);
+    }
   }
 
   set ul(items: HTMLElement[]) {

@@ -50,7 +50,7 @@ export interface IOrder {
   phone: string;
   address: string;
   total: number;
-  items: [];
+  items: string[];
 }
 
 

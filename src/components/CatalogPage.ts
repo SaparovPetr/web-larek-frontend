@@ -2,6 +2,13 @@ import {Component} from './base/Component';
 import {IEvents} from './base/events';
 import { ensureElement } from '../utils/utils';
 
+interface IcatalogPage {
+  counter: number;
+  catalog: HTMLElement[];
+  locked: boolean;
+}
+
+
 export class CatalogPage extends Component<IcatalogPage> {
   protected _counter: HTMLElement;
   protected _catalog: HTMLElement;

@@ -10,7 +10,8 @@
   background-color: $overlayBackground;
   z-index: 100;
   padding-top: 5vh;
-  padding-bottom: 5vh;
+  // padding-bottom: 5vh; //оригинал
+  padding-bottom: 33vh; // редактирование
 
   &_active {
     display: flex;
@@ -21,10 +22,11 @@
     @include mixins.flex(column);
     gap: $defaultPadding;
     background-color: $background;
-    min-height: 90vmin;
+    // min-height: 90vmin; //оригинал
+    min-height: 40vmin;  // редактирование
     border-radius: 3rem;
     box-sizing: border-box;
-    position: relative;
+    position: relative;    
   }
 
   &__content {

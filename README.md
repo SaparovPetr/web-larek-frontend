@@ -207,4 +207,4 @@ interface IOrder {
   items: [];
 }
 ```
-![Image alt](https://github.com/SaparovPetr/web-larek-project/blob/main/Larek3.jpg)
+![Image alt](https://github.com/SaparovPetr/web-larek-frontend/blob/main/Larek3.jpg)

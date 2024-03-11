@@ -6,7 +6,8 @@ import {AppState, CatalogChangeEvent, ItemData, BasketData} from "./components/A
 import {CatalogPage} from "./components/CatalogPage";
 import {cloneTemplate, ensureElement} from "./utils/utils";
 import {CatalogItem, AuctionItem, BidItem} from "./components/Card";
-import {FirstOrderPage} from "./components/firstOrderPage";
+import {FirstOrderPage} from "./components/FirstOrderPage";
+import {SecondOrderPage} from "./components/SecondOrderPage"
 
 import {Modal} from "./components/Modal";
 // import {Basket, BasketList} from "./components/Basket"
@@ -31,15 +32,12 @@ const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
 const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
 const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
 const basketListTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
- const firstOrderScreenTemplate = ensureElement<HTMLTemplateElement>('#order');
-
-
+const firstOrderScreenTemplate = ensureElement<HTMLTemplateElement>('#order');
+const secondOrderScreenTemplate = ensureElement<HTMLTemplateElement>('#contacts');
 
 const basket = new Basket(cloneTemplate(basketTemplate), {
   onClick: () => events.emit('orderButton:click')
 });
-
-
 
 // Модель данных приложения
 const appData = new AppState({}, events);
@@ -73,6 +71,7 @@ events.on<CatalogChangeEvent>('items:changed', () => {
 // Открыть лот
 events.on('card:select', (item: ItemData) => {
   appData.setPreview(item);
+  // appData.order.items.push(item);
   console.log(`клик по карточке каталога ${item.id}`) 
 });
 
@@ -116,15 +115,24 @@ events.on('busketButton:click', (item: ItemData) => {
   
   if (!basketList.basketArray.includes(item)) {
     basketList.addToBusket(item);
-    //  previewCard.busketButton.setAttribute("disabled", "disabled");
+    appData.order.items.push(item.id);    
+    appData.order.total = basketList.makeSum();
   } else {
     console.log('уже в корзине')
-    // previewCard.basketButton.setAttribute("disabled", "disabled");
   } 
   console.log(`клик "в корзину" ${item.id}`);
   basket.orderButton.removeAttribute("disabled");
   modal.close();
 });
+
+
+
+
+
+
+
+
+
 
 // изменен массив корзины
 events.on('basket:changed', (item: ItemData) => {    
@@ -161,29 +169,51 @@ events.on('basketDeleteButton:click', (item: ItemData) => {
 })
 
 
-
 // клик "Оформить"
-events.on('orderButton:click', (item: ItemData) => {  
+events.on('orderButton:click', () => {  
   console.log(`клик "Оформить" `);
-
   const firstOrderScreen = new FirstOrderPage(cloneTemplate(firstOrderScreenTemplate), {
-    onClick: () => events.emit('firstOrderScreenButton:click', item)
+    onClick: () => events.emit('firstOrderScreenButton:click'),
+    onOnlineClick: () => events.emit('by-card:click'),
+    onOfflineClick: () => events.emit('by-cash:click'),
+    inputRun: () => events.emit('input:tap'),
+  });
+
+  events.on('by-card:click', () => { 
+    console.log(`клик "Онлайн" `);
+    firstOrderScreen.payCard.classList.add('button_alt-active');
+    firstOrderScreen.payCash.classList.remove('button_alt-active');
+    appData.setOnlinePayWay()
+    console.log(appData.order)
   })
+  
+  events.on('by-cash:click', () => { 
+    console.log(`клик "Офлайн" `);
+    firstOrderScreen.payCash.classList.add('button_alt-active');
+    firstOrderScreen.payCard.classList.remove('button_alt-active');
+    appData.setOfflinePayWay()
+    console.log(appData.order)
+  })
+  
+  events.on('input:tap', () => { 
+    console.log(`ввод `);
+    appData.order.address = firstOrderScreen.addressInput.value;
+    console.log(appData.order)
+    if (appData.order.address.length) {
+      firstOrderScreen.nextScreenButton.removeAttribute("disabled")
+    } else {
+      firstOrderScreen.nextScreenButton.setAttribute("disabled", "disabled");
+    }
+  })  
 
   modal.render({
-      content: firstOrderScreen.render({
-      })
-    });
- 
+    content: firstOrderScreen.render()
+  });
+
+  events.on('firstOrderScreenButton:click', (item: ItemData) => { 
+    console.log(`клик Далее `);  
+  })  
 })
-
-
-
-
-
-
-
-
 
 
 

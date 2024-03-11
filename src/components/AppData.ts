@@ -31,7 +31,6 @@ export class AppState extends Model<IAppState> {
   preview: string | null;
   formErrors: FormErrors = {};
 
-
   setCatalog(items: IItemData[]) {
     this.catalog = items.map(item => new ItemData(item, this.events));
     this.emitChanges('items:changed', { catalog: this.catalog });
@@ -42,8 +41,24 @@ export class AppState extends Model<IAppState> {
     this.emitChanges('preview:changed', item);
   }
 
+  setOnlinePayWay() {
+    this.order.payment = "online"
+  }
+
+  setOfflinePayWay() {
+    this.order.payment = "offline"
+  }
+
+  // setAddress() {
+  //   this.order.address = this.order.address
+  // }
 
 }
+
+// export class Order extends Model<IOrder> {
+// }
+
+
 
 // подумать снова, как уналследоваться от модели вместо создания метода emitChanges
 export class BasketData {

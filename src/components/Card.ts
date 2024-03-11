@@ -19,8 +19,6 @@ export class Card extends Component<IItemData> {
     this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
     this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
     this._price = ensureElement<HTMLElement>(`.${blockName}__price`, container);
-
-    // так ли монтировать клик?
     if (actions?.onClick) {      
       container.addEventListener('click', actions.onClick);
     }

@@ -75,8 +75,12 @@ export class BasketData {
     this.emitChanges('basket:changed', item);
   }
   removeFromBusket(item: ItemData) {
-    this.basketArray.pop();
+    this.basketArray.shift();
     this.emitChanges('basket:changed', item);
+  }
+  clearBasket() {
+    this.basketArray.length = 0;
+    this.emitChanges('basket:changed');
   }
   makeSum(): number {
     let sum = 0;

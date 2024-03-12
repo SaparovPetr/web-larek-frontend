@@ -7,19 +7,16 @@ import {CatalogPage} from "./components/CatalogPage";
 import {cloneTemplate, ensureElement} from "./utils/utils";
 import {CatalogItem, AuctionItem, BidItem} from "./components/Card";
 import {FirstOrderPage} from "./components/FirstOrderPage";
-import {SecondOrderPage} from "./components/SecondOrderPage"
+import {SecondOrderPage} from "./components/SecondOrderPage";
+import {SuccessPage} from "./components/SuccessPage";
+
 
 import {Modal} from "./components/Modal";
 // import {Basket, BasketList} from "./components/Basket"
 import {Basket} from "./components/Basket"
 
-
-
-
-
 const events = new EventEmitter();
 const api = new LarekApi(CDN_URL, API_URL);
-
 
 // Чтобы мониторить все события, для отладки
 events.onAll(({ eventName, data }) => {
@@ -34,6 +31,7 @@ const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
 const basketListTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
 const firstOrderScreenTemplate = ensureElement<HTMLTemplateElement>('#order');
 const secondOrderScreenTemplate = ensureElement<HTMLTemplateElement>('#contacts');
+const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 
 const basket = new Basket(cloneTemplate(basketTemplate), {
   onClick: () => events.emit('orderButton:click')
@@ -208,19 +206,74 @@ events.on('orderButton:click', () => {
 
   modal.render({
     content: firstOrderScreen.render()
-  });
-
-  events.on('firstOrderScreenButton:click', (item: ItemData) => { 
-    console.log(`клик Далее `);  
-  })  
+  })
 })
 
 
+// Клик Далее
+events.on('firstOrderScreenButton:click', (evt: Event) => { 
+  // evt.preventDefault();
+  console.log(`клик Далее `);
+  const secondOrderScreen = new SecondOrderPage(cloneTemplate(secondOrderScreenTemplate), {
+    onClick: () => events.emit('secondOrderScreenButton:click'),
+    emailInputinputRun: () => events.emit('emailInput:tap'),
+    phoneInputRun: () => events.emit('phoneInput:tap'),
+  });
+
+  events.on('emailInput:tap', () => { 
+    appData.order.email = secondOrderScreen.emailInput.value;
+    console.log(appData.order);
+    if (!appData.order.email.length) {
+      secondOrderScreen.finishScreenButton.setAttribute("disabled", "disabled");
+    } 
+  })  
+
+  events.on('phoneInput:tap', () => { 
+    appData.order.phone = secondOrderScreen.phoneInput.value;
+    console.log(appData.order);
+
+    if (appData.order.email.length && appData.order.phone.length) {
+      secondOrderScreen.finishScreenButton.removeAttribute("disabled")
+    } else {
+      secondOrderScreen.finishScreenButton.setAttribute("disabled", "disabled");
+    }
+  })
+
+  modal.render({
+    content: secondOrderScreen.render()
+  });
+
+  
+})  
 
 
+events.on('secondOrderScreenButton:click', () => { 
+  // evt.preventDefault();
 
+  
 
+  
 
+  console.log(`клик Оплатить`);
+
+  const successScreen = new SuccessPage(cloneTemplate(successTemplate), {
+    onClick: () => events.emit('successScreenButton:click'),
+    counter: basketList.makeSum()
+  });
+
+  modal.render({
+    content: successScreen.render({
+          counter: basketList.makeSum()          
+        })
+  });
+
+  events.on('successScreenButton:click', () => {
+    console.log(`клик За новыми покупками`);
+    basketList.clearBasket();
+    modal.close();
+  })
+
+})
 
 
 

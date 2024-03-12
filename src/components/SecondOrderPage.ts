@@ -2,7 +2,9 @@ import {Component} from "./base/Component";
 import {bem, createElement, ensureElement, ensureAllElements, cloneTemplate} from "../utils/utils";
 
 interface ISecondOrderPage {  
-  inputRun(event: Event): void;
+  emailInputinputRun(event: Event): void;
+  phoneInputRun(event: Event): void;
+
   onClick(event: MouseEvent): void;
 }
 
@@ -17,13 +19,13 @@ export class SecondOrderPage extends Component<ISecondOrderPage>{
     super(container);
 
     this.emailInput = ensureElement<HTMLInputElement>('.email__input', container);
-    if (actions?.inputRun) { 
-      this.emailInput.addEventListener('input', actions.inputRun);      
+    if (actions?.emailInputinputRun) { 
+      this.emailInput.addEventListener('input', actions.emailInputinputRun);      
     }
 
     this.phoneInput = ensureElement<HTMLInputElement>('.phone__input', container);
-    if (actions?.inputRun) { 
-      this.phoneInput.addEventListener('input', actions.inputRun);      
+    if (actions?.phoneInputRun) { 
+      this.phoneInput.addEventListener('input', actions.phoneInputRun);      
     }
 
     this.errorNotice = ensureElement<HTMLElement>('.form__errors', container);

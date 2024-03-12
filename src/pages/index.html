@@ -210,7 +210,7 @@
 	<template id="basket">
 		<div class="basket">
 			<h2 class="modal__title">Корзина</h2>
-			<ul class="basket__list"></ul>
+			<ul class="basket__list"><p>Выберите товар из каталога</p></ul>
 			<div class="modal__actions">
 				<button class="button basket__button">Оформить</button>
 				<span class="basket__price">0 синапсов</span>
@@ -247,7 +247,7 @@
 			<div class="order">
 				<label class="order__field">
 					<span class="form__label modal__title">Email</span>
-					<input name="email" class="form__input email__input" type="text" placeholder="Введите Email" />
+					<input name="email" class="form__input email__input" type="email" placeholder="Введите Email" />
 				</label>
 				<label class="order__field">
 					<span class="form__label modal__title">Телефон</span>
@@ -255,9 +255,9 @@
 				</label>
 			</div>
 			<div class="modal__actions">
-				<button type="submit" disabled class="button">Оплатить</button>
+				<!-- <button type="submit" disabled class="button">Оплатить</button> -->
 				
-				<!-- <button type="button" disabled class="button">Оплатить</button> -->
+				<button type="button" disabled class="button">Оплатить</button>
 				<span class="form__errors"></span>
 			</div>
 		</form>

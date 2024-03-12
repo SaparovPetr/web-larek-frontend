@@ -74,8 +74,7 @@ export class Card extends Component<IItemData> {
     if (typeof value === "number") {
       this.setText(this._price, `${value} синапсов`);
     } else {
-      this.setText(this._price, "Бесценно");
-      
+      this.setText(this._price, "Бесценно");      
     }    
   }  
 }
@@ -88,15 +87,15 @@ export class CatalogItem extends Card {
 }
 
 // карточка превью
-export class AuctionItem extends Card {
+export class PreviewItem extends Card {
   protected _description: HTMLElement;
   basketButton: HTMLButtonElement;
 
   constructor(container: HTMLElement, actions?: ICardActions) {
     super('card', container, actions);  
     this._description = ensureElement<HTMLElement>('.card__text', container);
+    
     this.basketButton = ensureElement<HTMLButtonElement>('.card__button', container);
-            
     if (actions?.onClick) { 
       container.removeEventListener('click', actions.onClick);   
       this.basketButton.addEventListener('click', actions.onClick);      
@@ -109,8 +108,8 @@ export class AuctionItem extends Card {
 }
 
 
-// карточка корзины 
-export class BidItem extends Component<IItemData> {
+// карточка в корзине 
+export class ShortItem extends Component<IItemData> {
   protected _itemIndex: HTMLElement;
   protected _title: HTMLElement;
   protected _price: HTMLElement;

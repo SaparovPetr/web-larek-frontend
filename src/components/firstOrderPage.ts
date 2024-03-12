@@ -13,6 +13,7 @@ export class FirstOrderPage extends Component<IFirstOrderPage>{
   payCash: HTMLButtonElement;
   addressInput: HTMLInputElement;
   nextScreenButton: HTMLButtonElement;
+  firstOrderPageError: HTMLElement;
 
   constructor(container: HTMLElement, actions?: IFirstOrderPage) {
     super(container);
@@ -36,5 +37,7 @@ export class FirstOrderPage extends Component<IFirstOrderPage>{
       this.nextScreenButton.addEventListener('click', actions.onClick);      
     }
 
+    this.firstOrderPageError = ensureElement<HTMLElement>('.form__errors', container);
+    
   }
 }

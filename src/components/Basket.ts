@@ -9,8 +9,6 @@ interface IBasketActions {
 interface IBasket {
 }
 
-interface IBasketList {
-}
 
 
 export class Basket extends Component<IBasket> {
@@ -37,14 +35,5 @@ export class Basket extends Component<IBasket> {
     this.setText(this._basketCounter, String(`${value} синапсов`));
   }
 
-  // set orderButton(value: boolean) {
-  //   this._orderButton.disabled();
-  // }
-}
 
-// export class BasketList extends Component<IBasketList> {
-//   // protected _li: HTMLElement;
-//   constructor(container: HTMLElement, actions?: IBasketActions) {
-//     super(container);
-//   } 
-// }
+}

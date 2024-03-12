@@ -1,5 +1,5 @@
 import { Api, ApiListResponse } from './base/api';
-import { IItemData } from '../types/index';
+import { IItemData, IOrder, IOrderResult } from '../types/index';
 
 
 export class LarekApi extends Api {
@@ -11,7 +11,7 @@ export class LarekApi extends Api {
   }
 
   
-  getLotItem(id: string): Promise<IItemData> {
+  getOneItem(id: string): Promise<IItemData> {
     return this.get(`/product/${id}`).then(
         (item: IItemData) => ({
             ...item,
@@ -30,11 +30,11 @@ export class LarekApi extends Api {
   }
 
 
-  // orderItems(order: IOrder): Promise<IOrderResult> {
-  //   return this.post('/order', order).then(
-  //       (data: IOrderResult) => data
-  //   );
-  // }
+  orderItems(order: IOrder): Promise<IOrderResult> {
+    return this.post('/order/', order).then(
+        (data: IOrderResult) => data
+    );
+  }
 
 
 

@@ -49,15 +49,8 @@ export class AppState extends Model<IAppState> {
     this.order.payment = "offline"
   }
 
-  // setAddress() {
-  //   this.order.address = this.order.address
-  // }
 
 }
-
-// export class Order extends Model<IOrder> {
-// }
-
 
 
 // подумать снова, как уналследоваться от модели вместо создания метода emitChanges
@@ -79,8 +72,9 @@ export class BasketData {
     this.emitChanges('basket:changed', item);
   }
   clearBasket() {
-    this.basketArray.length = 0;
+    this.basketArray = [];
     this.emitChanges('basket:changed');
+    // return this.basketArray;
   }
   makeSum(): number {
     let sum = 0;
@@ -89,5 +83,5 @@ export class BasketData {
     });
     return sum;
   }
- 
+
 }

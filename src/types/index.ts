@@ -65,6 +65,44 @@ export interface IAppState {
 export type FormErrors = Partial<Record<keyof IOrder, string>>;
 
 
+
+
+
+
+
+
+export interface IOrderResult {
+  id: string;
+  total: number;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // // интерфейс каталога 
 // export interface IcatalogPage {
 //   wrapper: HTMLElement;

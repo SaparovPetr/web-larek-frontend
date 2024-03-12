@@ -13,7 +13,7 @@ export class SecondOrderPage extends Component<ISecondOrderPage>{
   emailInput: HTMLInputElement;
   phoneInput: HTMLInputElement;
   finishScreenButton: HTMLButtonElement;
-  errorNotice: HTMLElement;
+  secondOrderPageError: HTMLElement;
 
   constructor(container: HTMLElement, actions?: ISecondOrderPage) {
     super(container);
@@ -27,14 +27,21 @@ export class SecondOrderPage extends Component<ISecondOrderPage>{
     if (actions?.phoneInputRun) { 
       this.phoneInput.addEventListener('input', actions.phoneInputRun);      
     }
-
-    this.errorNotice = ensureElement<HTMLElement>('.form__errors', container);
-
     
     this.finishScreenButton = ensureElement<HTMLButtonElement>('.button', container);
     if (actions?.onClick) { 
       this.finishScreenButton.addEventListener('click', actions.onClick);      
     }
 
+    this.secondOrderPageError = ensureElement<HTMLElement>('.form__errors', container);
+
   }
+
+ 
+
+
 }
+
+
+
+

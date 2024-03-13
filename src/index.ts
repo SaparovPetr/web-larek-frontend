@@ -2,7 +2,7 @@ import './scss/styles.scss';
 import { EventEmitter}  from '../src/components/base/events';
 import { LarekApi } from './components/LarekApi';
 import {API_URL, CDN_URL} from "./utils/constants";
-import {AppState, CatalogChangeEvent, ItemData, BasketData} from "./components/AppData";
+import {AppState, CatalogChangeEvent, BasketData} from "./components/AppData";
 import {CatalogPage} from "./components/CatalogPage";
 import {cloneTemplate, ensureElement} from "./utils/utils";
 import {CatalogItem, PreviewItem, ShortItem} from "./components/Card";
@@ -11,6 +11,7 @@ import {SecondOrderPage} from "./components/SecondOrderPage";
 import {SuccessPage} from "./components/SuccessPage";
 import {Modal} from "./components/Modal";
 import {Basket} from "./components/Basket";
+import {IItemData} from "./types/index";
 
 const events = new EventEmitter();
 const api = new LarekApi(CDN_URL, API_URL);
@@ -52,14 +53,14 @@ events.on<CatalogChangeEvent>('items:changed', () => {
 });
 
 /// Открыть лот
-events.on('card:select', (item: ItemData) => {
+events.on('card:select', (item: IItemData) => {
   appData.setPreview(item);
   console.log(`отладка - клик по карточке каталога ${item.id}`);  
 });
 
 // Изменен открытый выбранный лот
-events.on('preview:changed', (item: ItemData) => {
-  const showItem = (item: ItemData) => {
+events.on('preview:changed', (item: IItemData) => {
+  const showItem = (item: IItemData) => {
       const previewCard = new PreviewItem(cloneTemplate(cardPreviewTemplate), {
         onClick: () => events.emit('busketButton:click', item)
     }); 
@@ -103,7 +104,7 @@ events.on('preview:changed', (item: ItemData) => {
 });
 
 //  клик по кнопке "в корзину" - отправляет данные карточки для их добавления в массив
-events.on('busketButton:click', (item: ItemData) => {  
+events.on('busketButton:click', (item: IItemData) => {  
   if (!basketList.basketArray.includes(item)) {
     basketList.addToBusket(item);
     appData.order.items.push(item.id);    
@@ -138,7 +139,7 @@ events.on('basket:open', () => {
 })
 
 // клик по кнопке удаления в корзине
-events.on('basketDeleteButton:click', (item: ItemData) => {  
+events.on('basketDeleteButton:click', (item: IItemData) => {  
   console.log(`отладка - клик "удалить из списка корзины" ${item.id}`);
   basketList.removeFromBusket(item);
   appData.order.items.shift();

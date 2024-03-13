@@ -1,17 +1,13 @@
 import {Component} from "./base/Component";
-import {bem, createElement, ensureElement} from "../utils/utils";
-import {IItemData} from "../types/index"
-
-
-interface ICardActions {
-  onClick: (event: MouseEvent) => void;
-}
+import {ensureElement} from "../utils/utils";
+import {IItemData, ICardActions, IPreviewItem} from "../types/index"
 
 export class Card extends Component<IItemData> {
-  protected _category?: HTMLElement;
+  protected _category: HTMLElement;
   protected _title: HTMLElement;
-  protected _image?: HTMLImageElement;
+  protected _image: HTMLImageElement;
   protected _price: HTMLElement;
+  protected _id: string;
 
   constructor(protected blockName: string, container: HTMLElement, actions?: ICardActions) {
     super(container);
@@ -22,33 +18,27 @@ export class Card extends Component<IItemData> {
     if (actions?.onClick) {      
       container.addEventListener('click', actions.onClick);
     }
-  }
-  
+  }  
   set id(value: string) {
     this.container.dataset.id = value;
   }
   get id(): string {
     return this.container.dataset.id || '';
   }
-
   set title(value: string) {
     this.setText(this._title, value);
   }
   get title(): string {
     return this._title.textContent || '';
   }
-
   set image(value: string) {
     this.setImage(this._image, value, this.title)
   }
   get image(): string {
     return this._image.src || '' && this._image.alt || '';
-  }
-
-  
+  }  
   set category (value: string) {
     this.setText(this._category, value)
-    
     if (value === "софт-скил") {
       this._category.className = 'card__category'
       this._category.classList.add('card__category_soft')
@@ -69,7 +59,6 @@ export class Card extends Component<IItemData> {
   get category(): string {
     return this._category.textContent || '';
   }
-
   set price (value: number | null) {
     if (typeof value === "number") {
       this.setText(this._price, `${value} синапсов`);
@@ -79,34 +68,40 @@ export class Card extends Component<IItemData> {
   }  
 }
 
-// карточка главной
-export class CatalogItem extends Card {
+// карточка в каталоге
+export class CatalogItem extends Card implements IItemData {
   constructor(container: HTMLElement, actions?: ICardActions) {
     super('card', container, actions);
   }
 }
 
 // карточка превью
-export class PreviewItem extends Card {
+export class PreviewItem extends Card implements IPreviewItem {
   protected _description: HTMLElement;
-  basketButton: HTMLButtonElement;
+  protected _buyButton: HTMLButtonElement;
 
   constructor(container: HTMLElement, actions?: ICardActions) {
     super('card', container, actions);  
     this._description = ensureElement<HTMLElement>('.card__text', container);
     
-    this.basketButton = ensureElement<HTMLButtonElement>('.card__button', container);
+    this._buyButton = ensureElement<HTMLButtonElement>('.card__button', container);
     if (actions?.onClick) { 
       container.removeEventListener('click', actions.onClick);   
-      this.basketButton.addEventListener('click', actions.onClick);      
+      this._buyButton.addEventListener('click', actions.onClick);      
     }
   }
-
-  set description(value: string) {
+  set description(value: HTMLElement) {
     this.setText(this._description, value)
   }   
-}
 
+  get buyButton(): HTMLButtonElement {
+    return this._buyButton;
+  }
+
+  set buyButton(element: HTMLButtonElement) {
+    this._buyButton = element;
+  }
+}
 
 // карточка в корзине 
 export class ShortItem extends Component<IItemData> {
@@ -114,14 +109,12 @@ export class ShortItem extends Component<IItemData> {
   protected _title: HTMLElement;
   protected _price: HTMLElement;
   protected _basketDeleteButton: HTMLButtonElement;
-
   constructor(container: HTMLElement, actions?: ICardActions) {
     super(container);
     this._itemIndex  = ensureElement<HTMLElement>('.basket__item-index', container);
     this._title = ensureElement<HTMLElement>('.card__title', container);
     this._price = ensureElement<HTMLElement>('.card__price', container);
     this._basketDeleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', container);
-
     if (actions?.onClick) { 
       this._basketDeleteButton.addEventListener('click', actions.onClick);      
     }
@@ -130,7 +123,6 @@ export class ShortItem extends Component<IItemData> {
   set title(value: string) {
     this.setText(this._title, value);
   }
-
   set price (value: number | null) {
     if (typeof value === "number") {
       this.setText(this._price, `${value} синапсов`);
@@ -138,83 +130,7 @@ export class ShortItem extends Component<IItemData> {
       this.setText(this._price, "Бесценно");      
     }    
   } 
-
   set itemIndex(value: number) {
     this.setText(this._itemIndex, value);
   }
-
-
 }
-
-  
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,15 +1,12 @@
 import { Api, ApiListResponse } from './base/api';
 import { IItemData, IOrder, IOrderResult } from '../types/index';
 
-
 export class LarekApi extends Api {
   readonly cdn: string;
-
   constructor(cdn: string, baseUrl: string, options?: RequestInit) {
     super(baseUrl, options);
     this.cdn = cdn;
   }
-
   
   getOneItem(id: string): Promise<IItemData> {
     return this.get(`/product/${id}`).then(
@@ -29,15 +26,9 @@ export class LarekApi extends Api {
     );
   }
 
-
   orderItems(order: IOrder): Promise<IOrderResult> {
     return this.post('/order/', order).then(
         (data: IOrderResult) => data
     );
-  }
-
-
-
-  
+  }  
 }
-

@@ -1,49 +1,6 @@
+////////   ИНТЕРФЕЙСЫ ДЛЯ МОДЕЛИ
 
-// интерфейс каталога 
-export interface IcatalogPage {
-  wrapper: HTMLElement;
-  counter: HTMLElement;
-  catalog: HTMLElement;
-  basket: HTMLElement;
-}
-
-// интерфейс модального окна 
-export interface IModal {
-  modalCloseButton: HTMLButtonElement;
-  modalContent: HTMLElement;
-  nextStepButton: HTMLButtonElement;
-  openModal(): void;
-  closeModal(): void;
-  goToTheNextStep(): void;
-  render(): HTMLElement
-}
-
-// интерфейс карточки товара 
-export interface IItemData {
-  id?: string;
-  description?: string;
-  image?: string;
-  title: string;
-  category?: string;
-  price: number | string;
-  itemIndex: number;
-}
-
-// // интерфейс корзины
-// export interface IBasket {
-//   listWithItems: IItremData[];
-//   getList(): void;
-//   removeItem(): IItremData[];
-//   calculateTotalPrice(): number;
-// }
-
-// интерфейс способа оплаты
-export interface IPayment { 
-  payment: "online" | "offline"; 
-  address: string;
-}
-
-// интерфейс формы
+// интерфейс заказа 
 export interface IOrder {
   payment: "online" | "offline";
   email: string;
@@ -52,116 +9,118 @@ export interface IOrder {
   total: number;
   items: string[];
 }
-
-
-
+// интерфейс состояния всего приложения 
 export interface IAppState {
   catalog: IItemData[];
-  basket: string[];
   order: IOrder | null;
+  preview: string | null;
 }
 
-
-export type FormErrors = Partial<Record<keyof IOrder, string>>;
-
-
-
-
-
-
-
-
+// интерфейс состояния корзины 
+export interface IBasketData {
+  basketArray: IItemData[];
+}
+// интерфейс ответа сервера на сделанный заказ
 export interface IOrderResult {
   id: string;
   total: number;
 }
 
+// интерфейс данных товара
+export interface IItemData {
+  id?: string;
+  description?: string;
+  image?: string;
+  title: string;
+  category?: string;
+  price: number | null;
+  itemIndex?: number;
+}
 
 
+////////   ИНТЕРФЕЙС ДЛЯ КАТАЛОГА
+
+export interface IcatalogPage {
+  counter: number;
+  catalog: HTMLElement[];
+  wrapper: HTMLElement;
+  basket: HTMLElement;
+  locked: boolean;
+}
 
 
+////////   ИНТЕРФЕЙС ПРЕВЬЮ
+
+// общий интерфейс действий для всех типов карточек
+export interface ICardActions {
+  onClick: (event: MouseEvent) => void;
+}
+
+// интерфейс карточки превью 
+export interface IPreviewItem {
+  description: HTMLElement;
+  buyButton: HTMLButtonElement;
+}
 
 
+////////    ИНТЕРФЕЙСЫ ДЛЯ КОРЗИНЫ 
+
+// интерфейс действий в корзине
+export interface IBasketActions {
+  onClick: (event: MouseEvent) => void;
+}
+// интерфейс корзины
+export interface IBasket {
+  ul: HTMLElement[];
+  counter: number;
+}
 
 
+////////   ИНТЕРФЕЙС ДЛЯ МОДАЛЬНОГО  ОКНА
+
+export interface IModalData {
+  content: HTMLElement;
+}
+
+////////   ИНТЕРФЕЙСЫ ДЛЯ ПЕРВОЙ СТРАНИЦЫ ОФОРМЛЕНИЯ
+
+// интерфейс действий на первой странице оформления
+export interface IFirstOrderPageActions {  
+  onOnlineClick(event: MouseEvent): void;
+  onOfflineClick(event: MouseEvent): void;
+  inputRun(event: Event): void;
+  onClick(event: MouseEvent): void;
+}
+// интерфейс первой страницы оформления
+export interface IFirstOrderPage {  
+  payCard: HTMLButtonElement;
+  payCash: HTMLButtonElement;
+  addressInput: HTMLInputElement;
+  nextScreenButton: HTMLButtonElement;
+  firstOrderPageError: HTMLElement;
+}
+
+////////   ИНТЕРФЕЙСЫ ДЛЯ ВТОРОЙ СТРАНИЦЫ ОФОРМЛЕНИЯ
+
+// интерфейс действий на второй странице оформления
+export interface ISecondOrderPageActions {  
+  emailInputinputRun(event: Event): void;
+  phoneInputRun(event: Event): void;
+  onClick(event: MouseEvent): void;
+}
+// интерфейс второй страницы оформления
+export interface ISecondOrderPage {  
+  emailInput: HTMLInputElement;
+  phoneInput: HTMLInputElement;
+  finishScreenButton: HTMLButtonElement;
+  secondOrderPageError: HTMLElement;
+}
 
 
+////////   ИНТЕРФЕЙС ДЛЯ СТРАНИЦЫ УСПЕХА
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // интерфейс каталога 
-// export interface IcatalogPage {
-//   wrapper: HTMLElement;
-//   counter: HTMLElement;
-//   catalog: HTMLElement;
-//   basket: HTMLElement;
-// }
-
-// // интерфейс модального окна 
-// export interface IModal {
-//   modalCloseButton: HTMLButtonElement;
-//   modalContent: HTMLElement;
-//   nextStepButton: HTMLButtonElement;
-//   openModal(): void;
-//   closeModal(): void;
-//   goToTheNextStep(): void;
-//   render(): HTMLElement
-// }
-
-// // интерфейс карточки товара 
-// export interface IItemData<T> {
-//   id?: string;
-//   description?: string;
-//   image?: string;
-//   title: string;
-//   category?: string;
-//   price: number | null;
-// }
-
-// // интерфейс корзины
-// export interface IBasket {
-//   listWithItems: IItremData[];
-//   getList(): void;
-//   removeItem(): IItremData[];
-//   calculateTotalPrice(): number;
-// }
-
-// // интерфейс способа оплаты
-// export interface IPayment { 
-//   payment: "online" | "offline"; 
-//   address: string;
-// }
-
-// // интерфейс формы
-// export interface IOrder {
-//   payment: "online" | "offline";
-//   email: string;
-//   phone: string;
-//   address: string;
-//   total: number;
-//   items: [];
-// }
-
-
-
-// export interface IAppState {
-//   catalog: IItemData[];
-//   basket: string[];
-//   preview: string | null;
-//   order: IOrder | null;
-// }
+export interface ISuccessPage {
+  counter: number;
+  onClick: (event: MouseEvent) => void;
+}
 

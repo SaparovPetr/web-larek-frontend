@@ -9,11 +9,8 @@ import {CatalogItem, PreviewItem, ShortItem} from "./components/Card";
 import {FirstOrderPage} from "./components/FirstOrderPage";
 import {SecondOrderPage} from "./components/SecondOrderPage";
 import {SuccessPage} from "./components/SuccessPage";
-
-
 import {Modal} from "./components/Modal";
-// import {Basket, BasketList} from "./components/Basket"
-import {Basket} from "./components/Basket"
+import {Basket} from "./components/Basket";
 
 const events = new EventEmitter();
 const api = new LarekApi(CDN_URL, API_URL);
@@ -35,14 +32,11 @@ const basket = new Basket(cloneTemplate(basketTemplate), {
 const appData = new AppState({}, events);
 const basketList = new BasketData([], events)
 
-
 // Глобальные контейнеры
 const page = new CatalogPage(document.body, events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
 // Изменились элементы каталога
-// 1^. В функции, которая рендерит карточки каталога, к каждой карточке прикрепляется обработчик события onClick:
-// 2^. Когда пользователь кликает на карточку, вызывается функция onClick, которая генерирует событие card:select с помощью объекта events (EventEmitter):
 events.on<CatalogChangeEvent>('items:changed', () => {
   page.catalog = appData.catalog.map(item => {
       const card = new CatalogItem(cloneTemplate(cardCatalogTemplate), {
@@ -57,25 +51,18 @@ events.on<CatalogChangeEvent>('items:changed', () => {
   });  
 });
 
-//  3^. есть подписчик на это событие card:select:
-//  4^. Когда событие card:select сгенерировано, вызывается этот подписчик, 
-//      который устанавливает выбранный лот в appData как "предпросмотр" (appData.setPreview(item)).
-// Открыть лот
+/// Открыть лот
 events.on('card:select', (item: ItemData) => {
   appData.setPreview(item);
-  console.log(`клик по карточке каталога ${item.id}`);  
+  console.log(`отладка - клик по карточке каталога ${item.id}`);  
 });
-
 
 // Изменен открытый выбранный лот
 events.on('preview:changed', (item: ItemData) => {
   const showItem = (item: ItemData) => {
       const previewCard = new PreviewItem(cloneTemplate(cardPreviewTemplate), {
         onClick: () => events.emit('busketButton:click', item)
-    });     
-
-      // 5^. Далее срабатывает другой подписчик на событие preview:changed:
-      // 6^. Этот подписчик рендерит модальное окно (modal.render()), передавая в него содержимое, сгенерированное компонентом PreviewItem (card.render()).
+    }); 
     modal.render({
       content: previewCard.render({
         title: item.title,
@@ -86,32 +73,32 @@ events.on('preview:changed', (item: ItemData) => {
       })
     });
 
-    if (item.title === 'Мамка-таймер') {
-      console.log('открыта бесценная карточка');
-      previewCard.basketButton.setAttribute("disabled", "disabled");
-      previewCard.basketButton.textContent = "Недоступно для приобретения";
+    // деактивация кнопики "В корзину", если товар бесценен
+    if (item.price === null) {
+      console.log('отладка - открыта бесценная карточка');
+      previewCard.buyButton.setAttribute("disabled", "disabled");
+      previewCard.buyButton.textContent = "Недоступно для приобретения";
     }
-  
-    if (appData.order.items.includes(item.id)) {
-      console.log('Уже в корзине');
-      previewCard.basketButton.setAttribute("disabled", "disabled");
-      previewCard.basketButton.textContent = "Уже в корзине";
 
-  
+    // деактивация кнопики "В корзину", если товар прежде добавлен в нее
+    if (appData.order.items.includes(item.id)) {
+      console.log('отладка - Уже в корзине');
+      previewCard.buyButton.setAttribute("disabled", "disabled");
+      previewCard.buyButton.textContent = "Уже в корзине";  
     }
   }; 
 
   if (item) {
       api.getOneItem(item.id)
-          .then((result) => {
-              item.description = result.description;
-              showItem(item);
-          })
-          .catch((err) => {
-              console.error(err);
-          })
+        .then((result) => {
+          item.description = result.description;
+          showItem(item);
+        })
+        .catch((err) => {
+          console.error(err);
+        })
   } else {
-      modal.close();
+    modal.close();
   }
 });
 
@@ -121,24 +108,20 @@ events.on('busketButton:click', (item: ItemData) => {
     basketList.addToBusket(item);
     appData.order.items.push(item.id);    
     appData.order.total = basketList.makeSum();
-  } else {
-    console.log('уже в корзине')
-  } 
-  console.log(`клик "в корзину" ${item.id}`);
+  }  
+  console.log(`отладка - клик "в корзину" ${item.id}`);
   basket.orderButton.removeAttribute("disabled");
   modal.close();
 });
 
-
 // изменен массив корзины
-events.on('basket:changed', (item: ItemData) => {    
+events.on('basket:changed', () => {    
   page.counter = basketList.basketArray.length;
   basket.counter = basketList.makeSum();
   basket.ul = basketList.basketArray.map(item => {
     const cardForBasket = new ShortItem(cloneTemplate(basketListTemplate), {
       onClick: () => events.emit('basketDeleteButton:click', item)
   });
-    // console.log(basket.ul)
     return cardForBasket.render({
         title: item.title,
         price: item.price,
@@ -147,9 +130,8 @@ events.on('basket:changed', (item: ItemData) => {
   });     
 })
 
-
-//  клик по кнопке корзины на главной - верхний темплейт
-events.on('basket:open', (item: ItemData) => {  
+//  клик по кнопке корзины на главной - внешний темплейт
+events.on('basket:open', () => {  
   modal.render({
     content: basket.render()
   })  
@@ -157,21 +139,19 @@ events.on('basket:open', (item: ItemData) => {
 
 // клик по кнопке удаления в корзине
 events.on('basketDeleteButton:click', (item: ItemData) => {  
-  console.log(`клик "удалить из списка корзины" ${item.id}`);
+  console.log(`отладка - клик "удалить из списка корзины" ${item.id}`);
   basketList.removeFromBusket(item);
   appData.order.items.shift();
 
-
-  // деактивировать кнопку "оформить" в очищенной корзине
+  // деактивирую кнопку "оформить" в очищенной корзине
   if (!basketList.basketArray.length) {
     basket.orderButton.setAttribute("disabled", "disabled");
   }
 })
 
-
 // клик "Оформить"
 events.on('orderButton:click', () => {  
-  console.log(`клик "Оформить" `);
+  console.log(`отладка - клик "Оформить" `);
   const firstOrderScreen = new FirstOrderPage(cloneTemplate(firstOrderScreenTemplate), {
     onClick: () => events.emit('firstOrderScreenButton:click'),
     onOnlineClick: () => events.emit('by-card:click'),
@@ -180,33 +160,32 @@ events.on('orderButton:click', () => {
   });
 
   events.on('by-card:click', () => { 
-    console.log(`клик "Онлайн" `);
+    console.log(`отладка - клик "Онлайн" `);
     firstOrderScreen.payCard.classList.add('button_alt-active');
     firstOrderScreen.payCash.classList.remove('button_alt-active');
-    appData.setOnlinePayWay()
-    console.log(appData.order)
+    appData.setOnlinePayWay();
+    console.log(appData.order);
   })
   
   events.on('by-cash:click', () => { 
-    console.log(`клик "Офлайн" `);
+    console.log(`отладка - клик "Офлайн" `);
     firstOrderScreen.payCash.classList.add('button_alt-active');
     firstOrderScreen.payCard.classList.remove('button_alt-active');
-    appData.setOfflinePayWay()
-    console.log(appData.order)
+    appData.setOfflinePayWay();
+    console.log(appData.order);
   })
   
   events.on('input:tap', () => { 
-    console.log(`ввод`);
+    console.log(`отладка - ввод`);
     appData.order.address = firstOrderScreen.addressInput.value;
-    console.log(appData.order)
+    console.log(appData.order);
     if (appData.order.address.length) {
-      firstOrderScreen.nextScreenButton.removeAttribute("disabled")
+      firstOrderScreen.nextScreenButton.removeAttribute("disabled");
       firstOrderScreen.firstOrderPageError.textContent = '';
 
     } else {
       firstOrderScreen.nextScreenButton.setAttribute("disabled", "disabled");
       firstOrderScreen.firstOrderPageError.textContent = 'Необходимо указать адрес';
-
     }
   })  
 
@@ -215,10 +194,9 @@ events.on('orderButton:click', () => {
   })
 })
 
-
-// Клик Далее
+// Клик "Далее"
 events.on('firstOrderScreenButton:click', () => { 
-  console.log(`клик Далее `);
+  console.log(`отладка - клик Далее `);
   const secondOrderScreen = new SecondOrderPage(cloneTemplate(secondOrderScreenTemplate), {
     onClick: () => events.emit('secondOrderScreenButton:click'),
     emailInputinputRun: () => events.emit('emailInput:tap'),
@@ -234,15 +212,12 @@ events.on('firstOrderScreenButton:click', () => {
       secondOrderScreen.secondOrderPageError.textContent = 'Необходимо указать email';
     } else {
       secondOrderScreen.secondOrderPageError.textContent = '';
-    }
-
-    
+    }    
   })  
 
   events.on('phoneInput:tap', () => { 
     appData.order.phone = secondOrderScreen.phoneInput.value;
     console.log(appData.order);
-
     if (appData.order.email.length && appData.order.phone.length) {
       secondOrderScreen.finishScreenButton.removeAttribute("disabled");
       secondOrderScreen.secondOrderPageError.textContent = '';
@@ -250,20 +225,16 @@ events.on('firstOrderScreenButton:click', () => {
       secondOrderScreen.finishScreenButton.setAttribute("disabled", "disabled");
       secondOrderScreen.secondOrderPageError.textContent = 'Необходимо указать телефон';
     }
-
   })
 
   modal.render({
     content: secondOrderScreen.render()
-  });
-
-  
+  });  
 })  
 
-
-// Клик Оплатить
+// Клик "Оплатить"
 events.on('secondOrderScreenButton:click', () => { 
-  console.log(`клик Оплатить`);
+  console.log('отладка - клик Оплатить');
   api.orderItems(appData.order)
     .then((result) => {        
       const successScreen = new SuccessPage(cloneTemplate(successTemplate), {
@@ -280,39 +251,18 @@ events.on('secondOrderScreenButton:click', () => {
       basketList.clearBasket();
       appData.order.items = [];
       basket.orderButton.setAttribute("disabled", "disabled");
-
-      
     })
     .catch(err => {
       console.error(err);
-    });  
- 
+    });
 })
 
-// Клик  За новыми покупками
+// Клик  "За новыми покупками"
 events.on('successScreenButton:click', () => {
-  console.log(`клик За новыми покупками`);
+  console.log(`отладка - клик "За новыми покупками"`);
   modal.close();
   basket.orderButton.setAttribute("disabled", "disabled");
 }) 
-
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // деактивировать кнопку "оформить" в изначально пустрой корзине
 if (!basketList.basketArray.length) {
@@ -335,4 +285,3 @@ api.getItemList()
   .catch(err => {
       console.error(err);
   });
-

@@ -1,12 +1,7 @@
+import {IcatalogPage} from "../types";
 import {Component} from './base/Component';
 import {IEvents} from './base/events';
 import { ensureElement } from '../utils/utils';
-
-interface IcatalogPage {
-  counter: number;
-  catalog: HTMLElement[];
-  locked: boolean;
-}
 
 
 export class CatalogPage extends Component<IcatalogPage> {
@@ -21,7 +16,6 @@ export class CatalogPage extends Component<IcatalogPage> {
     this._catalog = ensureElement<HTMLElement>('.gallery');
     this._wrapper = ensureElement<HTMLElement>('.page__wrapper');
     this._basket = ensureElement<HTMLElement>('.header__basket');
-
     this._basket.addEventListener('click', () => {
         this.events.emit('basket:open');
     });
@@ -44,7 +38,3 @@ export class CatalogPage extends Component<IcatalogPage> {
   }
 
 }
-
-
-
-

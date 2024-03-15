@@ -101,35 +101,16 @@ export class PreviewItem extends Card implements IPreviewItem {
     this.setText(this._buyButton, value)    
   }
 
-  // добавить в доку
   markPriceless() {    
     this.setText(this._buyButton, "Недоступно для приобретения");
     this.setDisabled(this._buyButton, true);    
   }
 
-    // добавить в доку
   markAdded() {
     this.setText(this._buyButton, "Уже в корзине");
     this.setDisabled(this._buyButton, true); 
   }  
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // карточка в корзине 
 export class ShortItem extends Component<IItemData> {

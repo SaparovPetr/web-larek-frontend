@@ -1,12 +1,6 @@
-
 import {Model} from "./base/Model";
-import {IAppState, IItemData, IOrder, IBasketData} from "../types";
+import {IAppState, IItemData, IOrder, IBasketData, IOrderForm, FormErrors} from "../types";
 import {IEvents} from "./base/Events";
-
-export type CatalogChangeEvent = {
-  catalog: IItemData[];
-};
-
 
 export class AppState extends Model<IAppState> {
   catalog: IItemData[];
@@ -14,11 +8,12 @@ export class AppState extends Model<IAppState> {
     email: '',
     phone: '',
     items: [],
-    payment: "online",
+    payment: "online", //по умолчанию
     address: "",
     total: 0,
   };
   preview: string | null;
+  formErrors: FormErrors = {};
 
   setCatalog(items: IItemData[]) {
     this.catalog = items.map(item => new Model(item, this.events)) as unknown as IItemData[];
@@ -28,11 +23,36 @@ export class AppState extends Model<IAppState> {
     this.preview = item.id;
     this.emitChanges('preview:changed', item);
   }
+
   setOnlinePayWay() {
     this.order.payment = "online";
   }
   setOfflinePayWay() {
     this.order.payment = "offline";
+  }
+  
+  setOrderField(field: keyof IOrderForm, value: string) {
+    this.order[field] = value;
+
+    if (this.validateOrder()) {
+      this.events.emit('order:ready', this.order);
+    }
+  }
+  
+  validateOrder() {
+    const errors: typeof this.formErrors = {};
+    if (!this.order.email) {
+        errors.email = 'Необходимо указать email';
+    }
+    if (!this.order.phone) {
+        errors.phone = 'Необходимо указать телефон';
+    }
+    if (!this.order.address) {
+      errors.address = 'Необходимо указать адрес';
+    }
+    this.formErrors = errors;
+    this.events.emit('formErrors:change', this.formErrors);
+    return Object.keys(errors).length === 0;
   }
 }
 

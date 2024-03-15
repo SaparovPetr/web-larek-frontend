@@ -1,17 +1,18 @@
 import './scss/styles.scss';
+import {IItemData, IOrderForm, IDeliveryForm} from "./types/index";
 import { EventEmitter}  from './components/base/Events';
+
 import { LarekApi } from './components/LarekApi';
 import {API_URL, CDN_URL} from "./utils/constants";
-import {AppState, CatalogChangeEvent, BasketData} from "./components/AppData";
+import {AppState, BasketData} from "./components/AppData";
 import {CatalogPage} from "./components/CatalogPage";
 import {cloneTemplate, ensureElement} from "./utils/utils";
 import {CatalogItem, PreviewItem, ShortItem} from "./components/Card";
-import {FirstOrderPage} from "./components/FirstOrderPage";
-import {SecondOrderPage} from "./components/SecondOrderPage";
+import {DeliveryForm} from './components/DeliveryForm';
 import {SuccessPage} from "./components/SuccessPage";
 import {Modal} from "./components/common/Modal";
 import {Basket} from "./components/Basket";
-import {IItemData} from "./types/index";
+import {ContactsForm} from './components/ContactsForm';
 
 const events = new EventEmitter();
 const api = new LarekApi(CDN_URL, API_URL);
@@ -21,13 +22,10 @@ const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
 const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
 const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
 const basketListTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
-const firstOrderScreenTemplate = ensureElement<HTMLTemplateElement>('#order');
-const secondOrderScreenTemplate = ensureElement<HTMLTemplateElement>('#contacts');
+const DeliveryFormTemplate = ensureElement<HTMLTemplateElement>('#order');
+const ContactsFormTemplate = ensureElement<HTMLTemplateElement>('#contacts');
 const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 
-const basket = new Basket(cloneTemplate(basketTemplate), {
-  onClick: () => events.emit('orderButton:click')
-});
 
 // Модель данных приложения
 const appData = new AppState({}, events);
@@ -37,8 +35,12 @@ const basketList = new BasketData([], events)
 const page = new CatalogPage(document.body, events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
+const deliveryForm = new DeliveryForm(cloneTemplate(DeliveryFormTemplate), events)
+const contactsForm = new ContactsForm(cloneTemplate(ContactsFormTemplate), events)
+const basket = new Basket(cloneTemplate(basketTemplate), events);
+
 // Изменились элементы каталога
-events.on<CatalogChangeEvent>('items:changed', () => {
+events.on('items:changed', () => {
   page.catalog = appData.catalog.map(item => {
       const card = new CatalogItem(cloneTemplate(cardCatalogTemplate), {
           onClick: () => events.emit('card:select', item)
@@ -52,13 +54,13 @@ events.on<CatalogChangeEvent>('items:changed', () => {
   });  
 });
 
-/// Открыть лот
+/// Открыть карточку превью
 events.on('card:select', (item: IItemData) => {
   appData.setPreview(item);
   console.log(`отладка - клик по карточке каталога ${item.id}`);  
 });
 
-// Изменен открытый выбранный лот
+// Изменена карточка
 events.on('preview:changed', (item: IItemData) => {
   const showItem = (item: IItemData) => {
       const previewCard = new PreviewItem(cloneTemplate(cardPreviewTemplate), {
@@ -140,140 +142,121 @@ events.on('basket:open', () => {
 events.on('basketDeleteButton:click', (item: IItemData) => {  
   console.log(`отладка - клик "удалить из списка корзины" ${item.id}`);
   basketList.removeFromBusket(item);
-  appData.order.items.shift();
+  appData.order.items.pop();
+  appData.order.total = basketList.makeSum();
+  console.log(appData.order);
 
-  // деактивирую кнопку "оформить" в очищенной корзине
+
+  // деактивировать кнопку "оформить" в очищенной корзине
   if (!basketList.basketArray.length) {
     basket.makeButtonAbled(true);
   }
 })
 
 // клик "Оформить"
-events.on('orderButton:click', () => {  
-  console.log(`отладка - клик "Оформить" `);
-  const firstOrderScreen = new FirstOrderPage(cloneTemplate(firstOrderScreenTemplate), {
-    onClick: () => events.emit('firstOrderScreenButton:click'),
-    onOnlineClick: () => events.emit('by-card:click'),
-    onOfflineClick: () => events.emit('by-cash:click'),
-    inputRun: () => events.emit('input:tap'),
+events.on('order:open', () => {
+    modal.render({
+      content: deliveryForm.render({
+        payment: '',
+        address: '',
+        valid: false,
+        errors: []
+      })
   });
 
-  events.on('by-card:click', () => { 
+  // Изменилось одно из полей первой формы
+  events.on(/^order\..*:change/, (data: { field: keyof IOrderForm, value: string }) => {
+    appData.setOrderField(data.field, data.value);  
+    console.log(appData.order);
+  });
+
+  // Изменилось состояние валидации первой формы
+  events.on('formErrors:change', (errors: Partial<IDeliveryForm>) => {
+    const { address, payment } = errors;
+    deliveryForm.valid = !address && !payment;
+    deliveryForm.errors = Object.values({address}).filter(i => !!i).join('; ');
+  });
+
+  // Изменился способ оплаты - на карту
+  events.on('by-card:click', () => {
     console.log(`отладка - клик "Онлайн" `);
-    firstOrderScreen.payCard.classList.add('button_alt-active');
-    firstOrderScreen.payCash.classList.remove('button_alt-active');
     appData.setOnlinePayWay();
-    console.log(appData.order);
+    deliveryForm.makePayByCardActive(true);
+    deliveryForm.makePayByCashActive(false); 
   })
-  
-  events.on('by-cash:click', () => { 
+
+  // Изменился способ оплаты - на наличные
+  events.on('by-cash:click', () => {
     console.log(`отладка - клик "Офлайн" `);
-    firstOrderScreen.payCash.classList.add('button_alt-active');
-    firstOrderScreen.payCard.classList.remove('button_alt-active');
     appData.setOfflinePayWay();
-    console.log(appData.order);
+    deliveryForm.makePayByCashActive(true); 
+    deliveryForm.makePayByCardActive(false);
   })
-  
-  events.on('input:tap', () => { 
-    console.log(`отладка - ввод`);
-    appData.order.address = firstOrderScreen.addressInput.value;
-    console.log(appData.order);
-    if (appData.order.address.length) {
-      firstOrderScreen.nextScreenButton.removeAttribute("disabled");
-      firstOrderScreen.firstOrderPageError.textContent = '';
+});
 
-    } else {
-      firstOrderScreen.nextScreenButton.setAttribute("disabled", "disabled");
-      firstOrderScreen.firstOrderPageError.textContent = 'Необходимо указать адрес';
-    }
-  })  
-
+// клик "Далее"
+events.on('order:submit', () => {
   modal.render({
-    content: firstOrderScreen.render()
-  })
-})
-
-// Клик "Далее"
-events.on('firstOrderScreenButton:click', () => { 
-  console.log(`отладка - клик Далее `);
-  const secondOrderScreen = new SecondOrderPage(cloneTemplate(secondOrderScreenTemplate), {
-    onClick: () => events.emit('secondOrderScreenButton:click'),
-    emailInputinputRun: () => events.emit('emailInput:tap'),
-    phoneInputRun: () => events.emit('phoneInput:tap'),
+    content: contactsForm.render({
+      email: '',
+      phone: '',
+      valid: false,
+      errors: []
+    })
   });
 
-  events.on('emailInput:tap', () => { 
-    appData.order.email = secondOrderScreen.emailInput.value;
+  // Изменилось состояние валидации второй формы
+  events.on('formErrors:change', (errors: Partial<IOrderForm>) => {
+    const { email, phone } = errors;
+    contactsForm.valid = !email && !phone;
+    contactsForm.errors = Object.values({ email, phone }).filter(i => !!i).join('; ');
+  });
+
+  // Изменилось одно из полей второй формы
+  events.on(/^contacts\..*:change/, (data: { field: keyof IOrderForm, value: string }) => {
+    appData.setOrderField(data.field, data.value);  
     console.log(appData.order);
-    
-    if (!appData.order.email.length) {
-      secondOrderScreen.finishScreenButton.setAttribute("disabled", "disabled");
-      secondOrderScreen.secondOrderPageError.textContent = 'Необходимо указать email';
-    } else {
-      secondOrderScreen.secondOrderPageError.textContent = '';
-    }    
-  })  
+  });
+});
 
-  events.on('phoneInput:tap', () => { 
-    appData.order.phone = secondOrderScreen.phoneInput.value;
-    console.log(appData.order);
-    if (appData.order.email.length && appData.order.phone.length) {
-      secondOrderScreen.finishScreenButton.removeAttribute("disabled");
-      secondOrderScreen.secondOrderPageError.textContent = '';
-    } else {
-      secondOrderScreen.finishScreenButton.setAttribute("disabled", "disabled");
-      secondOrderScreen.secondOrderPageError.textContent = 'Необходимо указать телефон';
-    }
-  })
-
-  modal.render({
-    content: secondOrderScreen.render()
-  });  
-})  
-
-// Клик "Оплатить"
-events.on('secondOrderScreenButton:click', () => { 
+events.on('contacts:submit', () => {
   console.log('отладка - клик Оплатить');
   api.orderItems(appData.order)
     .then((result) => {        
       const successScreen = new SuccessPage(cloneTemplate(successTemplate), {
-        onClick: () => events.emit('successScreenButton:click'),
-        counter: basketList.makeSum()
-      });
-
+        onClick: () => events.emit('successScreenButton:click')
+      });      
       modal.render({
         content: successScreen.render({
           counter: basketList.makeSum()          
         })            
       });
-
-      basketList.clearBasket();
-      appData.order.items = [];
-      basket.makeButtonAbled(true);
     })
     .catch(err => {
       console.error(err);
-    });
-})
+    });   
+});
 
 // Клик  "За новыми покупками"
 events.on('successScreenButton:click', () => {
   console.log(`отладка - клик "За новыми покупками"`);
+  basketList.clearBasket();
+  appData.order.items = [];
   modal.close();
   basket.makeButtonAbled(true);
-}) 
+});
 
 // деактивировать кнопку "оформить" в изначально пустрой корзине
 if (!basketList.basketArray.length) {
   basket.makeButtonAbled(true);
 }
 
-// Блокируем прокрутку страницы если открыта модалка
+// Блокироватьпрокрутку страницы если открыта модалка
 events.on('modal:open', () => {
   page.locked = true;
 });
 
-// ... и разблокируем
+// Разблокировать прокрутку страницы если  модалка закрыта
 events.on('modal:close', () => {
   page.locked = false;
 });

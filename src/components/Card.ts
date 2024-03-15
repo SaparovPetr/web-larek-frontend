@@ -92,16 +92,44 @@ export class PreviewItem extends Card implements IPreviewItem {
   }
   set description(value: HTMLElement) {
     this.setText(this._description, value)
-  }   
+  }  
 
   get buyButton(): HTMLButtonElement {
     return this._buyButton;
   }
-
-  set buyButton(element: HTMLButtonElement) {
-    this._buyButton = element;
+  set buyButton(value: HTMLButtonElement) {
+    this.setText(this._buyButton, value)    
   }
+
+  // добавить в доку
+  markPriceless() {    
+    this.setText(this._buyButton, "Недоступно для приобретения");
+    this.setDisabled(this._buyButton, true);    
+  }
+
+    // добавить в доку
+  markAdded() {
+    this.setText(this._buyButton, "Уже в корзине");
+    this.setDisabled(this._buyButton, true); 
+  }  
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // карточка в корзине 
 export class ShortItem extends Component<IItemData> {

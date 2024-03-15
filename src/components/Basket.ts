@@ -35,4 +35,10 @@ export class Basket extends Component<IBasket> {
   set orderButton(element: HTMLButtonElement) {
     this._orderButton = element;
   }
+
+  makeButtonAbled(value: boolean) {
+    this.setDisabled(this._orderButton, value); 
+  }  
+
 }
+

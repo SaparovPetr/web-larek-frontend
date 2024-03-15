@@ -1,5 +1,5 @@
 import './scss/styles.scss';
-import { EventEmitter}  from '../src/components/base/events';
+import { EventEmitter}  from './components/base/Events';
 import { LarekApi } from './components/LarekApi';
 import {API_URL, CDN_URL} from "./utils/constants";
 import {AppState, CatalogChangeEvent, BasketData} from "./components/AppData";
@@ -9,7 +9,7 @@ import {CatalogItem, PreviewItem, ShortItem} from "./components/Card";
 import {FirstOrderPage} from "./components/FirstOrderPage";
 import {SecondOrderPage} from "./components/SecondOrderPage";
 import {SuccessPage} from "./components/SuccessPage";
-import {Modal} from "./components/Modal";
+import {Modal} from "./components/common/Modal";
 import {Basket} from "./components/Basket";
 import {IItemData} from "./types/index";
 
@@ -77,15 +77,13 @@ events.on('preview:changed', (item: IItemData) => {
     // деактивация кнопики "В корзину", если товар бесценен
     if (item.price === null) {
       console.log('отладка - открыта бесценная карточка');
-      previewCard.buyButton.setAttribute("disabled", "disabled");
-      previewCard.buyButton.textContent = "Недоступно для приобретения";
+      previewCard.markPriceless();     
     }
 
     // деактивация кнопики "В корзину", если товар прежде добавлен в нее
-    if (appData.order.items.includes(item.id)) {
+    if (appData.order.items.includes(item.id)) {      
       console.log('отладка - Уже в корзине');
-      previewCard.buyButton.setAttribute("disabled", "disabled");
-      previewCard.buyButton.textContent = "Уже в корзине";  
+      previewCard.markAdded()
     }
   }; 
 
@@ -111,7 +109,7 @@ events.on('busketButton:click', (item: IItemData) => {
     appData.order.total = basketList.makeSum();
   }  
   console.log(`отладка - клик "в корзину" ${item.id}`);
-  basket.orderButton.removeAttribute("disabled");
+  basket.makeButtonAbled(false);
   modal.close();
 });
 
@@ -146,7 +144,7 @@ events.on('basketDeleteButton:click', (item: IItemData) => {
 
   // деактивирую кнопку "оформить" в очищенной корзине
   if (!basketList.basketArray.length) {
-    basket.orderButton.setAttribute("disabled", "disabled");
+    basket.makeButtonAbled(true);
   }
 })
 
@@ -251,7 +249,7 @@ events.on('secondOrderScreenButton:click', () => {
 
       basketList.clearBasket();
       appData.order.items = [];
-      basket.orderButton.setAttribute("disabled", "disabled");
+      basket.makeButtonAbled(true);
     })
     .catch(err => {
       console.error(err);
@@ -262,12 +260,12 @@ events.on('secondOrderScreenButton:click', () => {
 events.on('successScreenButton:click', () => {
   console.log(`отладка - клик "За новыми покупками"`);
   modal.close();
-  basket.orderButton.setAttribute("disabled", "disabled");
+  basket.makeButtonAbled(true);
 }) 
 
 // деактивировать кнопку "оформить" в изначально пустрой корзине
 if (!basketList.basketArray.length) {
-  basket.orderButton.setAttribute("disabled", "disabled");
+  basket.makeButtonAbled(true);
 }
 
 // Блокируем прокрутку страницы если открыта модалка
@@ -283,6 +281,4 @@ events.on('modal:close', () => {
 // получить карточки с сервера
 api.getItemList()
   .then(appData.setCatalog.bind(appData))
-  .catch(err => {
-      console.error(err);
-  });
+  .catch(console.error);

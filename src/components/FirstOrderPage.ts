@@ -30,6 +30,7 @@ export class FirstOrderPage extends Component<IFirstOrderPage> {
     }
     this._firstOrderPageError = ensureElement<HTMLElement>('.form__errors', container);
   }
+  
 
   get payCard(): HTMLButtonElement {
     return this._payCard;

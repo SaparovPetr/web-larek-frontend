@@ -2,6 +2,7 @@ import {IFirstOrderPageActions, IFirstOrderPage} from "../types";
 import {Component} from "./base/Component";
 import {ensureElement} from "../utils/utils";
 
+
 export class FirstOrderPage extends Component<IFirstOrderPage> {
   protected _payCard: HTMLButtonElement;
   protected _payCash: HTMLButtonElement;

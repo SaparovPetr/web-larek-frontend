@@ -1,5 +1,6 @@
 node_modules
 dist
+backup____________remove after compliting
 .env
 .yarn
 .idea

@@ -138,14 +138,13 @@ events.on('basket:open', () => {
   })  
 })
 
-// клик по кнопке удаления в корзине
+// клик "удалить" в корзине
 events.on('basketDeleteButton:click', (item: IItemData) => {  
   console.log(`отладка - клик "удалить из списка корзины" ${item.id}`);
   basketList.removeFromBusket(item);
   appData.order.items.pop();
   appData.order.total = basketList.makeSum();
   console.log(appData.order);
-
 
   // деактивировать кнопку "оформить" в очищенной корзине
   if (!basketList.basketArray.length) {
@@ -219,6 +218,7 @@ events.on('order:submit', () => {
   });
 });
 
+// клик Оплатить
 events.on('contacts:submit', () => {
   console.log('отладка - клик Оплатить');
   api.orderItems(appData.order)
